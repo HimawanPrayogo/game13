@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Bomb</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .box {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+        .box:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+        .box.clicked {
+            pointer-events: none;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #1e3c72;
+            transform: scale(0.9);
+        }
+        .bomb {
+            background-color: red !important;
+            color: white;
+            animation: shake 0.3s ease-in-out;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background: #ff4081;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background: #e91e63;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Tebak Bomb</h1>
+    <p>Klik kotak untuk menghindari bomb!</p>
+    <div class="container" id="grid"></div>
+    <p id="message"></p>
+    <button onclick="restartGame()">Mulai Ulang</button>
+
+    <script>
+        const gridSize = 5 * 5;
+        let bombPositions = [];
+        let gameOver = false;
+
+        function generateBombs() {
+            bombPositions = [];
+            while (bombPositions.length < 5) {
+                let pos = Math.floor(Math.random() * gridSize);
+                if (!bombPositions.includes(pos)) {
+                    bombPositions.push(pos);
+                }
+            }
+        }
+
+        function createGrid() {
+            const grid = document.getElementById("grid");
+            grid.innerHTML = "";
+            gameOver = false;
+            document.getElementById("message").textContent = "";
+            generateBombs();
+
+            for (let i = 0; i < gridSize; i++) {
+                const box = document.createElement("div");
+                box.classList.add("box");
+                box.dataset.index = i;
+                box.addEventListener("click", handleClick);
+                grid.appendChild(box);
+            }
+        }
+
+        function handleClick(event) {
+            if (gameOver) return;
+
+            const box = event.target;
+            const index = parseInt(box.dataset.index);
+            
+            if (bombPositions.includes(index)) {
+                box.classList.add("bomb");
+                box.textContent = "💣";
+                gameOver = true;
+                document.getElementById("message").textContent = "Game Over! Anda Menekan Bomb!";
+                revealBombs();
+            } else {
+                box.classList.add("clicked");
+                box.textContent = "✔";
+            }
+        }
+
+        function revealBombs() {
+            document.querySelectorAll(".box").forEach((box) => {
+                const index = parseInt(box.dataset.index);
+                if (bombPositions.includes(index)) {
+                    box.classList.add("bomb");
+                    box.textContent = "💣";
+                }
+                box.style.pointerEvents = "none";
+            });
+        }
+
+        function restartGame() {
+            createGrid();
+        }
+
+        createGrid();
+    </script>
+</body>
+</html>
